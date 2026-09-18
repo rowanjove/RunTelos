@@ -5,55 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 jobs:
-  windows-check:
-    runs-on: windows-latest
-    timeout-minutes: 30
+  rust:
+    uses: rowanjove/.github/.github/workflows/rust-ci.yml@main
+    with:
+      working-directory: src-tauri
 
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Cache Rust build
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Frontend tests
-        run: npm test
-
-      - name: Verify project metadata
-        run: npm run verify:project
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Check Rust formatting
-        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
-
-      - name: Lint Rust
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-
-      - name: Test Rust
-        run: cargo test --manifest-path src-tauri/Cargo.toml
-
-      - name: Audit npm dependencies
-        run: npm audit
+  node:
+    uses: rowanjove/.github/.github/workflows/node-ci.yml@main
